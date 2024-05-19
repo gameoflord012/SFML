@@ -177,7 +177,7 @@ void WindowImpl::setMaximumSize(const std::optional<Vector2u>& maximumSize)
 
 
 ////////////////////////////////////////////////////////////
-Event WindowImpl::popEvent(bool block)
+std::optional<Event> WindowImpl::popEvent(bool block)
 {
     // If the event queue is empty, let's first check if new events are available from the OS
     if (m_events.empty())
@@ -203,14 +203,12 @@ Event WindowImpl::popEvent(bool block)
         }
     }
 
-    Event event;
-
     // Pop the first event of the queue, if it is not empty
-    if (!m_events.empty())
-    {
-        event = m_events.front();
-        m_events.pop();
-    }
+    if (m_events.empty())
+        return std::nullopt;
+
+    sf::Event event = m_events.front();
+    m_events.pop();
 
     return event;
 }

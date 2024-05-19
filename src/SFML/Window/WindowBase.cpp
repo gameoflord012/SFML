@@ -136,11 +136,15 @@ bool WindowBase::isOpen() const
 
 
 ////////////////////////////////////////////////////////////
-Event WindowBase::pollEvent()
+std::optional<Event> WindowBase::pollEvent()
 {
-    Event event;
-    if (m_impl && (event = m_impl->popEvent(false)))
-        filterEvent(event);
+    if (m_impl == nullptr)
+        return std::nullopt;
+
+    std::optional<sf::Event> event = m_impl->popEvent(false /* non-blocking */);
+    if (event.has_value())
+        filterEvent(*event);
+
     return event;
 }
 
@@ -148,10 +152,13 @@ Event WindowBase::pollEvent()
 ////////////////////////////////////////////////////////////
 Event WindowBase::waitEvent()
 {
-    Event event;
-    if (m_impl && (event = m_impl->popEvent(true)))
-        filterEvent(event);
-    return event;
+    assert(m_impl);
+
+    std::optional<sf::Event> event = m_impl->popEvent(true /* blocking */);
+    assert(event.has_value());
+
+    filterEvent(*event);
+    return *event;
 }
 
 
